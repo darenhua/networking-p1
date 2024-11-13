@@ -1,0 +1,121 @@
+#!/usr/bin/env python3.10
+
+import sys
+import threading
+from socket import *
+import time
+
+# referenced https://realpython.com/intro-to-python-threading/
+def newClientThread(clientSocket, fakeIp, serverIp, logFile):
+    print("Starting new thread", fakeIp, serverIp)
+
+    # create create tcp connection with apache server to forward the request
+    apacheSocket = socket(AF_INET, SOCK_STREAM)
+    apacheSocket.bind((fakeIp, 0))
+    apacheSocket.connect((serverIp, 80))
+
+    while True:
+        try:
+            request = b''
+            # read http request
+            # read until HTTP request ends (unknown)
+            while True:
+                data = clientSocket.recv(4096)
+                if not data:
+                    break
+
+                request += data
+
+                if b'\r\n\r\n' in request:
+                    break
+            print("request received")
+
+            #splitRequest = request.split("\n")
+            print("TESTING")
+            splitFirstline = splitRequest[0].split(" ")
+            print("METHOD: ", splitFirstline[0], "path: ", splitFirstline[1])
+            # forward the request
+            apacheSocket.send(request)
+    
+            startTime = time.time()
+
+            # read the http response
+            # read until it ends:
+            response = b''
+            while True:
+                data = apacheSocket.recv(4096)
+                if not data:
+                    break
+                
+                response += data
+
+                if b'r\n\r\n' in request:
+                    break
+
+            print("response received")
+
+            # Write to logfile after each response for a chunk
+            currentTime = time.time()
+            duration = currentTime - startTime
+            throughput = 0
+            averageThroughput = 0
+            chunkBitrate = 0
+
+            chunkFilename = ""
+
+            logFile.write(f"{currentTime} {duration} {throughput} {averageThroughput} {chunkBitrate} {serverIp} {chunkFilename}")
+            logFile.write("\n")
+            logFile.flush()  
+
+            # forward the response to client
+            clientSocket.send(response)
+            apacheSocket.close()
+
+        except KeyboardInterrupt:    
+            print("stopping...")
+        except SomeError as e:
+            print(e)
+            raise e
+        finally: 
+            print("something went wrong!")
+            clientSocket.close()
+            apacheSocket.close()
+            break
+
+def main():
+    logFilename = sys.argv[1]
+    listenPort = int(sys.argv[2])
+    fakeIp = sys.argv[3]
+    serverIp = sys.argv[4]
+
+    # Open file for the logs
+    logFile = open(logFilename, "w")
+    # Server socket for connections with the client    
+    serverSocket = socket(AF_INET, SOCK_STREAM)
+    serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+
+    serverSocket.bind(('', listenPort))
+    serverSocket.listen(100)
+    
+    # Forever: listen for connection requests
+    # and create a new thread (background proccess)
+    # for that connection request / client.
+    try:
+        while True:
+            clientSocket, addr = serverSocket.accept()
+            clientThread = threading.Thread(
+                target=newClientThread,
+                args=(clientSocket, fakeIp, serverIp, logFile),
+                daemon=True
+            )
+            clientThread.start()
+    except KeyboardInterrupt:
+        print("stopping...")
+    finally:
+        serverSocket.close()
+        logFile.close()
+        
+
+if __name__ == "__main__":
+    main()
+

@@ -1,0 +1,21 @@
+INFO:__main__:Starting simulated network...
+INFO:__main__:Enabling traffic shaping...
+INFO:TestLog:sudo /sbin/tc class replace dev lo parent 9999: classid 9999:1 htb rate 1000mbit ceil 1000mbit
+INFO:TestLog:sudo /sbin/tc qdisc replace dev lo parent 9999:1 handle 1: netem delay 0ms
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 1.0.0.1 match ip src 3.0.0.1 flowid 9999:1
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 3.0.0.1 match ip src 1.0.0.1 flowid 9999:1
+INFO:TestLog:sudo /sbin/tc class replace dev lo parent 9999: classid 9999:1 htb rate 1000mbit ceil 1000mbit
+INFO:TestLog:sudo /sbin/tc qdisc replace dev lo parent 9999:1 handle 1: netem delay 0ms
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 1.0.0.1 match ip src 4.0.0.1 flowid 9999:1
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 4.0.0.1 match ip src 1.0.0.1 flowid 9999:1
+INFO:TestLog:sudo /sbin/tc class replace dev lo parent 9999: classid 9999:1 htb rate 1000mbit ceil 1000mbit
+INFO:TestLog:sudo /sbin/tc qdisc replace dev lo parent 9999:1 handle 1: netem delay 0ms
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 2.0.0.1 match ip src 3.0.0.1 flowid 9999:1
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 3.0.0.1 match ip src 2.0.0.1 flowid 9999:1
+INFO:TestLog:sudo /sbin/tc class replace dev lo parent 9999: classid 9999:1 htb rate 1000mbit ceil 1000mbit
+INFO:TestLog:sudo /sbin/tc qdisc replace dev lo parent 9999:1 handle 1: netem delay 0ms
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 2.0.0.1 match ip src 4.0.0.1 flowid 9999:1
+INFO:TestLog:sudo /sbin/tc filter replace dev lo protocol ip parent 9999: prio 1 u32 match ip dst 4.0.0.1 match ip src 2.0.0.1 flowid 9999:1
+INFO:__main__:Configuring apache...
+INFO:__main__:Network started.
+Restarting apache2 (via systemctl): apache2.service.
